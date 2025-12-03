@@ -15,28 +15,26 @@ pipeline {
             }
         }
 
-        // --- AQUÍ ESTÁ EL CAMBIO MÁGICO ---
         stage('Test Backend') {
             agent {
-                // Usamos una imagen oficial de Maven para hacer el test
                 docker {
                     image 'maven:3.9.6-eclipse-temurin-17'
-                    args '-v /root/.m2:/root/.m2' // Para que sea rápido
+                    args '-v /root/.m2:/root/.m2'
                 }
             }
             steps {
-                dir('TINGESO') {
-                    // Ya no usamos ./mvnw. Usamos el comando 'mvn' oficial
+                // CAMBIO AQUÍ: Agregamos "/backend" a la ruta
+                dir('TINGESO/backend') {
                     sh 'mvn test'
                 }
             }
         }
-        // ----------------------------------
 
         stage('Build & Push Backend') {
             steps {
                 script {
-                    dir('TINGESO') {
+                    // CAMBIO AQUÍ: También buscamos el Dockerfile dentro de backend
+                    dir('TINGESO/backend') {
                         withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', passwordVariable: 'DOCKER_PASS', usernameVariable: 'DOCKER_USER')]) {
                             sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
                             sh "docker build -t ${BACKEND_IMAGE}:${TAG} ."
@@ -50,6 +48,7 @@ pipeline {
         stage('Build & Push Frontend') {
             steps {
                 script {
+                    // Mantenemos esto igual (a menos que tu frontend también tenga subcarpeta)
                     dir('frontend_tingeso') {
                         withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', passwordVariable: 'DOCKER_PASS', usernameVariable: 'DOCKER_USER')]) {
                             sh "docker build -t ${FRONTEND_IMAGE}:${TAG} ."
