@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CopilotDiffPersistence">
+    <option name="pendingDiffs">
+      <map>
+        <entry key="$PROJECT_DIR$/backend/src/main/java/com/example/ToolRent/dto/ActiveLoanReportDTO.java">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/backend/src/main/java/com/example/ToolRent/dto/ActiveLoanReportDTO.java" />
+              <option name="updatedContent" value="package com.example.ToolRent.dto;&#10;&#10;import lombok.AllArgsConstructor;&#10;import lombok.Data;&#10;import lombok.NoArgsConstructor;&#10;import java.time.LocalDate;&#10;&#10;@Data&#10;@AllArgsConstructor&#10;@NoArgsConstructor&#10;public class ActiveLoanReportDTO {&#10;    private Long loanId;&#10;    private String customerName;&#10;    private String customerRut;&#10;    private String toolName;&#10;    private String toolCategory;&#10;    private LocalDate loanDate;&#10;    private LocalDate returnDate;&#10;    private String status; // &quot;activo&quot; (vigente) o &quot;vencido&quot; (atrasado)&#10;    private int loanValue;&#10;    private Long daysOverdue; // null si está vigente, &gt;0 si está atrasado&#10;}&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>

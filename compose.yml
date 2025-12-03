@@ -1,0 +1,136 @@
+services:
+  # Frontend services
+  frontend1:
+    build:
+      context: ./frontend_tingeso
+      dockerfile: Dockerfile
+      args:
+        VITE_TOOLRENT_BACKEND_SERVER: 192.168.1.10
+        VITE_TOOLRENT_BACKEND_PORT: 8090
+        VITE_KEYCLOAK_URL: http://192.168.1.10:8080
+        VITE_KEYCLOAK_REALM: toolrent-realm
+        VITE_KEYCLOAK_CLIENT_ID: toolrent-frontend
+    networks:
+      - app-network
+
+  frontend2:
+    build:
+      context: ./frontend_tingeso
+      dockerfile: Dockerfile
+      args:
+        VITE_TOOLRENT_BACKEND_SERVER: 192.168.1.10
+        VITE_TOOLRENT_BACKEND_PORT: 8090
+        VITE_KEYCLOAK_URL: http://192.168.1.10:8080
+        VITE_KEYCLOAK_REALM: toolrent-realm
+        VITE_KEYCLOAK_CLIENT_ID: toolrent-frontend
+    networks:
+      - app-network
+
+  frontend3:
+    build:
+      context: ./frontend_tingeso
+      dockerfile: Dockerfile
+      args:
+        VITE_TOOLRENT_BACKEND_SERVER: 192.168.1.10
+        VITE_TOOLRENT_BACKEND_PORT: 8090
+        VITE_KEYCLOAK_URL: http://192.168.1.10:8080
+        VITE_KEYCLOAK_REALM: toolrent-realm
+        VITE_KEYCLOAK_CLIENT_ID: toolrent-frontend
+    networks:
+      - app-network
+
+  # Backend services
+  backend1:
+    build:
+      context: ./TINGESO/backend
+      dockerfile: Dockerfile
+    environment:
+      # AQUÍ ESTÁ EL CAMBIO
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://192.168.1.10:5432/ToolRent
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=1234
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_JPA_SHOW_SQL=true
+      - DB_HOST=192.168.1.10
+      - DB_PORT=5432
+      # Y AQUÍ
+      - DB_NAME=ToolRent
+      - DB_PASSWORD=1234
+      - KEYCLOAK_URL=http://192.168.1.10:8080
+      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI=http://192.168.1.10:8080/realms/toolrent-realm
+    networks:
+      - app-network
+
+  backend2:
+    build:
+      context: ./TINGESO/backend
+      dockerfile: Dockerfile
+    environment:
+      # AQUÍ ESTÁ EL CAMBIO
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://192.168.1.9:5432/ToolRent
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=1234
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_JPA_SHOW_SQL=true
+      - DB_HOST=192.168.1.9
+      - DB_PORT=5432
+      # Y AQUÍ
+      - DB_NAME=ToolRent
+      - DB_PASSWORD=1234
+      - KEYCLOAK_URL=http://192.168.1.10:8080
+      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI=http://192.168.1.10:8080/realms/toolrent-realm
+    networks:
+      - app-network
+
+  backend3:
+    build:
+      context: ./TINGESO/backend
+      dockerfile: Dockerfile
+    environment:
+      # AQUÍ ESTÁ EL CAMBIO
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://192.168.1.10:5432/ToolRent
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=1234
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_JPA_SHOW_SQL=true
+      - DB_HOST=192.168.1.10
+      - DB_PORT=5432
+      # Y AQUÍ
+      - DB_NAME=ToolRent
+      - DB_PASSWORD=1234
+      - KEYCLOAK_URL=http://192.168.1.10:8080
+      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI=http://192.168.1.10:8080/realms/toolrent-realm
+    networks:
+      - app-network
+
+  # Nginx for frontend load balancing
+  nginx-frontend:
+    image: nginx:latest
+    ports:
+      - "8070:80"
+    volumes:
+      - ./nginx-frontend.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - frontend1
+      - frontend2
+      - frontend3
+    networks:
+      - app-network
+
+  # Nginx for backend load balancing
+  nginx-backend:
+    image: nginx:latest
+    ports:
+      - "8090:8090"
+    volumes:
+      - ./nginx-backend.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - backend1
+      - backend2
+      - backend3
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
