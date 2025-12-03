@@ -2,7 +2,6 @@ pipeline {
     agent any
 
     environment {
-        // Asegúrate de que este usuario sea correcto
         DOCKER_HUB_USER = 'javieralamilla'
         BACKEND_IMAGE = "${DOCKER_HUB_USER}/toolrent-backend"
         FRONTEND_IMAGE = "${DOCKER_HUB_USER}/toolrent-frontend"
@@ -16,16 +15,23 @@ pipeline {
             }
         }
 
+        // --- AQUÍ ESTÁ EL CAMBIO MÁGICO ---
         stage('Test Backend') {
+            agent {
+                // Usamos una imagen oficial de Maven para hacer el test
+                docker {
+                    image 'maven:3.9.6-eclipse-temurin-17'
+                    args '-v /root/.m2:/root/.m2' // Para que sea rápido
+                }
+            }
             steps {
-                // CORRECCIÓN AQUÍ: Usamos el nombre real de tu carpeta
                 dir('TINGESO') {
-                    // Damos permisos y ejecutamos el test
-                    sh 'chmod +x mvnw'
-                    sh './mvnw test'
+                    // Ya no usamos ./mvnw. Usamos el comando 'mvn' oficial
+                    sh 'mvn test'
                 }
             }
         }
+        // ----------------------------------
 
         stage('Build & Push Backend') {
             steps {
@@ -44,7 +50,6 @@ pipeline {
         stage('Build & Push Frontend') {
             steps {
                 script {
-                    // CORRECCIÓN AQUÍ: Usamos el nombre real de tu carpeta frontend
                     dir('frontend_tingeso') {
                         withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', passwordVariable: 'DOCKER_PASS', usernameVariable: 'DOCKER_USER')]) {
                             sh "docker build -t ${FRONTEND_IMAGE}:${TAG} ."
@@ -58,7 +63,6 @@ pipeline {
 
     post {
         always {
-            // Intentamos limpiar, si falla no importa (|| true)
             sh "docker rmi ${BACKEND_IMAGE}:${TAG} || true"
             sh "docker rmi ${FRONTEND_IMAGE}:${TAG} || true"
         }
